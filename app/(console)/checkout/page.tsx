@@ -11,6 +11,8 @@ const RECENT_TXNS = [
   { id: "#51002", isbn: "9012", title: "Treasure Island", member: "Tatiana Arcand", issued: "2025-12-25", returned: "2025-12-26", method: "Kiosk" },
 ];
 
+import { useConsole } from "../_components/ConsoleContext";
+
 export default function Page() {
   const [mode, setMode] = React.useState<"Issue" | "Return">("Issue");
   const [form, setForm] = React.useState({
@@ -50,61 +52,35 @@ export default function Page() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-4">
-        <Card title={`${mode} Form`} right={<Badge text="Mock mode" />}>
-          <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label="Member ID" value={form.memberId} onChange={(e) => set("memberId", e.target.value)} placeholder="#12903" />
-              <Input label="Book ISBN" value={form.isbn} onChange={(e) => set("isbn", e.target.value)} placeholder="1188" />
-              <Select label="Method" value={form.method} onChange={(e) => set("method", e.target.value)}>
-                <option>Desk</option>
-                <option>Kiosk</option>
-              </Select>
+      <CheckoutContent />
+    </ConsoleShell>
+  );
+}
 
-              {mode === "Issue" ? (
-                <Input label="Due (days)" value={form.dueDays} onChange={(e) => set("dueDays", e.target.value)} placeholder="14" />
-              ) : (
-                <Input label="Condition (optional)" placeholder="Good / Damaged" />
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <PrimaryButton type="submit">
-                <ClipboardCheck className="h-4 w-4" />
-                {mode === "Issue" ? "Issue Book" : "Return Book"}
-              </PrimaryButton>
-
-              <SecondaryButton type="button" onClick={() => setForm({ memberId: "", isbn: "", method: "Desk", dueDays: "14" })}>
-                <RotateCcw className="h-4 w-4 text-slate-500" />
-                Reset
-              </SecondaryButton>
-
-              <SecondaryButton type="button">
-                <Search className="h-4 w-4 text-slate-500" />
-                Quick Find
-              </SecondaryButton>
-            </div>
-
-            <div className="rounded-2xl border bg-emerald-50 p-3 text-sm text-emerald-800 inline-flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Tip: your API can validate Member + ISBN, then create a transaction record.
-            </div>
-          </form>
-        </Card>
-
-        <Card title="Recent Transactions" right={<Badge text={`${RECENT_TXNS.length}`} />}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-xs text-slate-500">
-                  <th className="text-left font-medium py-2">Txn</th>
-                  <th className="text-left font-medium py-2">Title</th>
-                  <th className="text-left font-medium py-2">Member</th>
-                  <th className="text-left font-medium py-2">Issued</th>
-                  <th className="text-left font-medium py-2">Returned</th>
-                  <th className="text-left font-medium py-2">Method</th>
-                </tr>
-              </thead>
+function CheckoutContent() {
+  const { search } = useConsole();
+  const filtered = RECENT_TXNS.filter((r) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return [r.title, r.member, r.id, r.isbn].join(" ").toLowerCase().includes(q);
+  });
+  // ...existing code...
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-4">
+      {/* ...existing form code... */}
+      <Card title={`Recent Transactions`} right={<Badge text={`${filtered.length}`} />}>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-xs text-slate-500">
+                <th className="text-left font-medium py-2">Txn</th>
+                <th className="text-left font-medium py-2">Title</th>
+                <th className="text-left font-medium py-2">Member</th>
+                <th className="text-left font-medium py-2">Issued</th>
+                <th className="text-left font-medium py-2">Returned</th>
+                <th className="text-left font-medium py-2">Method</th>
+              </tr>
+            </thead>
               <tbody className="divide-y">
                 {RECENT_TXNS.map((r, idx) => (
                   <tr key={idx} className="text-slate-700">

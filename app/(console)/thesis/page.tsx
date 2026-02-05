@@ -1,26 +1,28 @@
-"use client";
 
+"use client";
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, FilePlus2, ClipboardCheck, ListChecks } from "lucide-react";
+import { FilePlus2, ClipboardCheck, ListChecks } from "lucide-react";
 import ConsoleShell from "../_components/ConsoleShell";
-import { Badge, Card, MiniBar, Pill } from "../_components/ui";
+import { Card, Badge, Pill, MiniBar } from "../_components/ui";
 
+// Mock data for thesis dashboard
 const THESIS_STATS = [
-  { label: "Total Theses", value: "4,120", delta: "+4%", trend: "up" as const, sub: "catalog growth" },
-  { label: "Issued", value: "186", delta: "+9%", trend: "up" as const, sub: "last 30 days" },
-  { label: "Overdue", value: "14", delta: "+2", trend: "up" as const, sub: "needs follow-up" },
-  { label: "Pending Approval", value: "7", delta: "-1", trend: "down" as const, sub: "submission queue" },
-];
-
-const PENDING = [
-  { id: "T-2025-091", title: "Blockchain-based Archiving", student: "Ayesha Khalid", dept: "CS", year: "2025", status: "Supervisor review" },
-  { id: "T-2025-077", title: "Water Quality Prediction", student: "Hassan Raza", dept: "Env", year: "2025", status: "LSIT LIBRARY verification" },
+  { label: "Total Theses", value: 120, sub: "All time", trend: "up", delta: "+5" },
+  { label: "Issued", value: 80, sub: "This year", trend: "up", delta: "+2" },
+  { label: "Pending", value: 10, sub: "Approvals", trend: "down", delta: "-1" },
+  { label: "Overdue", value: 3, sub: "Control", trend: "up", delta: "+1" },
 ];
 
 const RECENT_ISSUES = [
-  { txn: "TX-3901", thesisId: "T-2024-018", title: "NLP for Urdu", member: "#22391", issued: "2025-12-28", due: "2026-01-04", status: "Open" },
-  { txn: "TX-3897", thesisId: "T-2023-122", title: "Supply Chain Analytics", member: "#12903", issued: "2025-12-27", due: "2026-01-03", status: "Overdue" },
+  { txn: "#T1001", thesisId: "TH-001", title: "AI in Healthcare", member: "Ali", issued: "2025-12-01", due: "2026-01-01", status: "Open" },
+  { txn: "#T1002", thesisId: "TH-002", title: "Blockchain Security", member: "Fatima", issued: "2025-11-15", due: "2025-12-15", status: "Overdue" },
+  { txn: "#T1003", thesisId: "TH-003", title: "Quantum Computing", member: "Mishii", issued: "2025-12-20", due: "2026-01-20", status: "Open" },
+];
+
+const PENDING = [
+  { id: "P-001", title: "Edge AI Devices", student: "Sara", dept: "CS", year: "2025", status: "Pending" },
+  { id: "P-002", title: "IoT Security", student: "Usman", dept: "EE", year: "2025", status: "Pending" },
 ];
 
 export default function Page() {
@@ -54,6 +56,27 @@ export default function Page() {
         </>
       }
     >
+      <ThesisContent />
+    </ConsoleShell>
+  );
+}
+
+import { useConsole } from "../_components/ConsoleContext";
+
+function ThesisContent() {
+  const { search } = useConsole();
+  const filteredIssues = RECENT_ISSUES.filter((r) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return [r.title, r.member, r.thesisId, r.txn].join(" ").toLowerCase().includes(q);
+  });
+  const filteredPending = PENDING.filter((r) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return [r.title, r.student, r.id, r.dept].join(" ").toLowerCase().includes(q);
+  });
+  return (
+    <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {THESIS_STATS.map((s, idx) => (
           <div key={s.label} className="rounded-2xl border bg-white shadow-sm p-4">
@@ -77,7 +100,7 @@ export default function Page() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-4">
-        <Card title="Recent Thesis Issues" right={<Badge text={`${RECENT_ISSUES.length} txns`} />}>
+        <Card title="Recent Thesis Issues" right={<Badge text={`${filteredIssues.length} txns`} />}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -91,7 +114,7 @@ export default function Page() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {RECENT_ISSUES.map((r) => (
+                {filteredIssues.map((r) => (
                   <tr key={r.txn} className="text-slate-700">
                     <td className="py-2">
                       <div className="font-medium text-slate-900">{r.txn}</div>
@@ -105,7 +128,11 @@ export default function Page() {
                       <span
                         className={[
                           "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                          r.status === "Overdue" ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700",
+                          r.status === "Overdue"
+                            ? "bg-rose-50 text-rose-700"
+                            : r.status === "Open"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-amber-50 text-amber-800",
                         ].join(" ")}
                       >
                         {r.status}
@@ -116,36 +143,39 @@ export default function Page() {
               </tbody>
             </table>
           </div>
-
-          <div className="mt-4">
-            <Link href="/thesis/records" className="text-xs text-slate-600 hover:text-slate-800 inline-flex items-center gap-1">
-              Open records <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
         </Card>
 
-        <Card title="Pending Submissions" right={<Badge text={`${PENDING.length} items`} />}>
-          <div className="space-y-3">
-            {PENDING.map((p) => (
-              <div key={p.id} className="rounded-2xl border p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-sm font-semibold text-slate-900">{p.title}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      {p.id} • {p.student} • {p.dept} • {p.year}
-                    </div>
-                  </div>
-                  <Badge text={p.status} />
-                </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <button className="rounded-xl border bg-white px-3 py-2 text-xs hover:bg-slate-50">Approve</button>
-                  <button className="rounded-xl border bg-white px-3 py-2 text-xs hover:bg-slate-50">Reject</button>
-                </div>
-              </div>
-            ))}
+        <Card title="Pending Approvals" right={<Badge text={`${filteredPending.length} pending`} />}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-slate-500">
+                  <th className="text-left font-medium py-2">ID</th>
+                  <th className="text-left font-medium py-2">Title</th>
+                  <th className="text-left font-medium py-2">Student</th>
+                  <th className="text-left font-medium py-2">Dept</th>
+                  <th className="text-left font-medium py-2">Year</th>
+                  <th className="text-left font-medium py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filteredPending.map((r) => (
+                  <tr key={r.id} className="text-slate-700">
+                    <td className="py-2">
+                      <div className="font-medium text-slate-900">{r.id}</div>
+                    </td>
+                    <td className="py-2">{r.title}</td>
+                    <td className="py-2">{r.student}</td>
+                    <td className="py-2">{r.dept}</td>
+                    <td className="py-2">{r.year}</td>
+                    <td className="py-2">{r.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Card>
       </div>
-    </ConsoleShell>
+    </>
   );
 }

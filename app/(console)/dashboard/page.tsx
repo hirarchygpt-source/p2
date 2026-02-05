@@ -2,9 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Download, Filter, Plus, ShieldCheck, Clock, Activity } from "lucide-react";
+import { ArrowUpRight, Download, Plus, ShieldCheck, Clock, Activity } from "lucide-react";
 import ConsoleShell from "../_components/ConsoleShell";
 import { Badge, Card, MiniBar, Pill } from "../_components/ui";
+import { useConsole } from "../_components/ConsoleContext";
 
 type Stat = {
   label: string;
@@ -14,12 +15,7 @@ type Stat = {
   sub?: string;
 };
 
-const STATS: Stat[] = [
-  { label: "Borrowed Books", value: "2,405", delta: "+23%", trend: "up", sub: "vs last period" },
-  { label: "Returned Books", value: "783", delta: "-14%", trend: "down", sub: "processing slower" },
-  { label: "Overdue Books", value: "45", delta: "+11%", trend: "up", sub: "needs follow-up" },
-  { label: "Missing Books", value: "12", delta: "+11%", trend: "up", sub: "investigation opened" },
-];
+// STATS will be computed from filtered data
 
 const OVERDUE_ROWS = [
   { memberId: "#48964", member: "Ali", title: "Magnolia Palace", isbn: "3234", dueIn: "5d", fine: "PKR 100", status: "Reminder sent" },
@@ -34,11 +30,6 @@ export default function Page() {
       subtitle="Track circulation, overdue risk, member growth, and fee collections."
       rightActions={
         <>
-          <button className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-            <Filter className="h-4 w-4 text-slate-500" />
-            Filters
-          </button>
-
           <Link
             href="/add-books"
             className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
@@ -49,6 +40,52 @@ export default function Page() {
         </>
       }
     >
+      <DashboardContent />
+    </ConsoleShell>
+  );
+}
+
+function DashboardContent() {
+  const { search, range, availability } = useConsole();
+
+  // Simulate a dateAdded for demo (real data should have a date field)
+  const now = Date.now();
+  const days = (n) => n * 24 * 60 * 60 * 1000;
+  const threshold = range === "Last 30 days" ? days(30) : days(180);
+  // Fake date mapping for demo
+  const overdueWithDate = OVERDUE_ROWS.map((r, i) => ({
+    ...r,
+    // Stagger dates: first = 10d ago, second = 40d, third = 150d
+    dateAdded: new Date(now - [10, 40, 150][i % 3] * 24 * 60 * 60 * 1000).toISOString(),
+    available: r.status === "Reminder sent" ? 1 : 0 // fake availability
+  }));
+
+  const filteredOverdue = overdueWithDate.filter((r) => {
+    // Search
+    const matchesSearch = !search || [r.member, r.title, r.isbn].join(" ").toLowerCase().includes(search.toLowerCase());
+    // Range
+    const added = new Date(r.dateAdded).getTime();
+    const matchesRange = !r.dateAdded || added >= now - threshold;
+    // Availability
+    const matchesAvailability =
+      availability === "All" || (availability === "Available" ? r.available > 0 : r.available === 0);
+    return matchesSearch && matchesRange && matchesAvailability;
+  });
+
+  // Compute stats from filtered data
+  const borrowed = filteredOverdue.length + 10; // fake: add 10 for demo
+  const returned = Math.max(0, 50 - filteredOverdue.length); // fake: 50 minus overdue
+  const overdue = filteredOverdue.length;
+  const missing = filteredOverdue.filter(r => r.status === "Escalated").length;
+  const STATS: Stat[] = [
+    { label: "Borrowed Books", value: borrowed.toString(), delta: "+23%", trend: "up", sub: "vs last period" },
+    { label: "Returned Books", value: returned.toString(), delta: "-14%", trend: "down", sub: "processing slower" },
+    { label: "Overdue Books", value: overdue.toString(), delta: "+11%", trend: "up", sub: "needs follow-up" },
+    { label: "Missing Books", value: missing.toString(), delta: "+11%", trend: "up", sub: "investigation opened" },
+  ];
+
+  return (
+    <>
       {/* Quick strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="rounded-2xl border bg-slate-50 px-4 py-3 flex items-center justify-between">
@@ -124,7 +161,7 @@ export default function Page() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {OVERDUE_ROWS.map((r, idx) => (
+              {filteredOverdue.map((r, idx) => (
                 <tr key={idx} className="text-slate-700">
                   <td className="py-2">
                     <div className="font-medium text-slate-900">{r.member}</div>
@@ -162,6 +199,6 @@ export default function Page() {
           </Link>
         </div>
       </Card>
-    </ConsoleShell>
+    </>
   );
 }

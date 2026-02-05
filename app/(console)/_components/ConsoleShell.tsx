@@ -15,11 +15,13 @@ import {
   LogOut,
   Menu,
   Search,
+  Filter,
   Settings,
   Users,
   X,
 } from "lucide-react";
 import { cn } from "./ui";
+import { ConsoleProvider, useConsole } from "./ConsoleContext";
 
 function SideLink({
   href,
@@ -52,6 +54,78 @@ function SideLink({
   );
 }
 
+function SearchInput() {
+  const { search, setSearch } = useConsole();
+  return (
+    <div className="relative w-full md:max-w-[680px]">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full rounded-2xl border bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-200"
+        placeholder="Search: ISBN, Title, Author, Member, Transaction…"
+      />
+    </div>
+  );
+}
+
+function HeaderRight({ rightActions }: { rightActions?: React.ReactNode }) {
+  const { showFilters, setShowFilters } = useConsole();
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        <Filter className="h-4 w-4 text-slate-500" />
+        Filters
+      </button>
+      {rightActions}
+    </div>
+  );
+}
+
+function RangeToggle() {
+  const { range, setRange } = useConsole();
+  return (
+    <button
+      className="inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+      onClick={() => setRange(range === "Last 6 months" ? "Last 30 days" : "Last 6 months")}
+      title="Toggle range (mock)"
+    >
+      <Activity className="h-4 w-4 text-slate-500" />
+      {range}
+      <ChevronDown className="h-4 w-4 text-slate-400" />
+    </button>
+  );
+}
+
+function FilterPanel() {
+  const { showFilters, setShowFilters, availability, setAvailability } = useConsole();
+  if (!showFilters) return null;
+  return (
+    <div className="absolute right-6 top-28 z-50 w-64 rounded-xl border bg-white p-3 shadow-lg">
+      <div className="flex items-center justify-between">
+        <div className="font-medium text-sm">Filters</div>
+        <button className="text-xs text-slate-500" onClick={() => setShowFilters(false)}>Close</button>
+      </div>
+
+      <div className="mt-3">
+        <div className="text-xs text-slate-500 mb-1">Availability</div>
+        <select
+          value={availability}
+          onChange={(e) => setAvailability(e.target.value as any)}
+          className="w-full rounded-2xl border bg-white px-3 py-2 text-sm outline-none"
+        >
+          <option>All</option>
+          <option>Available</option>
+          <option>Unavailable</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
 export default function ConsoleShell({
   title,
   subtitle,
@@ -63,7 +137,6 @@ export default function ConsoleShell({
   rightActions?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const [rangeLabel, setRangeLabel] = React.useState("Last 6 months");
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const pathname = usePathname();
 
@@ -73,7 +146,8 @@ export default function ConsoleShell({
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <ConsoleProvider>
+      <div className="min-h-screen bg-slate-50">
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[280px_1fr]">
         {/* Mobile overlay */}
         {sidebarOpen && (
@@ -119,7 +193,7 @@ export default function ConsoleShell({
             <SideLink href="/dashboard" icon={<LayoutGrid className="h-4 w-4" />} label="Dashboard" />
             <SideLink href="/members" icon={<Users className="h-4 w-4" />} label="Members" />
             <SideLink href="/add-books" icon={<BookPlus className="h-4 w-4" />} label="Add Books" />
-            <SideLink href="/checkout" icon={<ClipboardCheck className="h-4 w-4" />} label="Check-out Books" />
+            {/* <SideLink href="/checkout" icon={<ClipboardCheck className="h-4 w-4" />} label="Check-out Books" /> */}
             <SideLink href="/inventory" icon={<Boxes className="h-4 w-4" />} label="Inventory" />
             <SideLink href="/thesis" icon={<GraduationCap className="h-4 w-4" />} label="Thesis Management" />
 
@@ -156,29 +230,15 @@ export default function ConsoleShell({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">{rightActions}</div>
+                <HeaderRight rightActions={rightActions} />
               </div>
 
               {/* Search + controls */}
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="relative w-full md:max-w-[680px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input
-                    className="w-full rounded-2xl border bg-white pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                    placeholder="Search: ISBN, Title, Author, Member, Transaction…"
-                  />
-                </div>
+                <SearchInput />
 
                 <div className="flex items-center justify-between md:justify-end gap-3">
-                  <button
-                    className="inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                    onClick={() => setRangeLabel((p) => (p === "Last 6 months" ? "Last 30 days" : "Last 6 months"))}
-                    title="Toggle range (mock)"
-                  >
-                    <Activity className="h-4 w-4 text-slate-500" />
-                    {rangeLabel}
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
-                  </button>
+                  <RangeToggle />
 
                   <button className="rounded-2xl border p-2 hover:bg-slate-50" aria-label="Notifications">
                     <Bell className="h-4 w-4 text-slate-600" />
@@ -197,11 +257,14 @@ export default function ConsoleShell({
             </div>
           </div>
 
+          <FilterPanel />
+
           <div className="px-6 py-6 space-y-6">{children}</div>
 
           <div className="px-6 pb-8 text-xs text-slate-500">UI-only mock data. Next: connect API.</div>
         </main>
       </div>
     </div>
+    </ConsoleProvider>
   );
 }
