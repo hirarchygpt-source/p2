@@ -148,123 +148,123 @@ export default function ConsoleShell({
   return (
     <ConsoleProvider>
       <div className="min-h-screen bg-slate-50">
-      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[280px_1fr]">
-        {/* Mobile overlay */}
-        {sidebarOpen && (
-          <button
-            aria-label="Close sidebar overlay"
-            className="fixed inset-0 z-40 bg-black/30 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar */}
-        <aside
-          className={cn(
-            // Solid blue background + borders (no gradient)
-            "bg-sky-700 border-sky-800 border-b lg:border-b-0 lg:border-r",
-            // Mobile drawer behavior
-            "fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-200 ease-out lg:static lg:inset-auto lg:w-auto lg:translate-x-0",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[280px_1fr]">
+          {/* Mobile overlay */}
+          {sidebarOpen && (
+            <button
+              aria-label="Close sidebar overlay"
+              className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
           )}
-        >
-          <div className="px-6 py-6 flex items-center gap-3 justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-white/15 text-white grid place-items-center text-sm font-semibold shadow-sm border border-white/20">
-                L
+
+          {/* Sidebar */}
+          <aside
+            className={cn(
+              // Solid blue background + borders (no gradient)
+              "bg-sky-700 border-sky-800 border-b lg:border-b-0 lg:border-r",
+              // Mobile drawer behavior
+              "fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-200 ease-out lg:static lg:inset-auto lg:w-auto lg:translate-x-0",
+              sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            )}
+          >
+            <div className="px-6 py-6 flex items-center gap-3 justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-white/15 text-white grid place-items-center text-sm font-semibold shadow-sm border border-white/20">
+                  L
+                </div>
+                <div className="leading-tight">
+                  <div className="font-semibold text-white">LSIT LIBRARY</div>
+                  <div className="text-xs text-white/80">Operations Console</div>
+                </div>
               </div>
-              <div className="leading-tight">
-                <div className="font-semibold text-white">LSIT LIBRARY</div>
-                <div className="text-xs text-white/80">Operations Console</div>
-              </div>
+
+              {/* Close button (mobile only) */}
+              <button
+                className="lg:hidden rounded-xl p-2 hover:bg-white/15"
+                aria-label="Close sidebar"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-5 w-5 text-white" />
+              </button>
             </div>
 
-            {/* Close button (mobile only) */}
-            <button
-              className="lg:hidden rounded-xl p-2 hover:bg-white/15"
-              aria-label="Close sidebar"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5 text-white" />
-            </button>
-          </div>
+            <nav className="px-3 pb-4">
+              <SideLink href="/dashboard" icon={<LayoutGrid className="h-4 w-4" />} label="Dashboard" />
+              <SideLink href="/members" icon={<Users className="h-4 w-4" />} label="Members" />
+              <SideLink href="/add-books" icon={<BookPlus className="h-4 w-4" />} label="Add Books" />
+              <SideLink href="/checkout" icon={<ClipboardCheck className="h-4 w-4" />} label="Check-out Books" />
+              <SideLink href="/inventory" icon={<Boxes className="h-4 w-4" />} label="Inventory" />
+              <SideLink href="/thesis" icon={<GraduationCap className="h-4 w-4" />} label="Thesis Management" />
 
-          <nav className="px-3 pb-4">
-            <SideLink href="/dashboard" icon={<LayoutGrid className="h-4 w-4" />} label="Dashboard" />
-            <SideLink href="/members" icon={<Users className="h-4 w-4" />} label="Members" />
-            <SideLink href="/add-books" icon={<BookPlus className="h-4 w-4" />} label="Add Books" />
-            {/* <SideLink href="/checkout" icon={<ClipboardCheck className="h-4 w-4" />} label="Check-out Books" /> */}
-            <SideLink href="/inventory" icon={<Boxes className="h-4 w-4" />} label="Inventory" />
-            <SideLink href="/thesis" icon={<GraduationCap className="h-4 w-4" />} label="Thesis Management" />
+              <div className="my-3 border-t border-white/20" />
+              <SideLink href="/settings" icon={<Settings className="h-4 w-4" />} label="Settings" />
+            </nav>
 
-            <div className="my-3 border-t border-white/20" />
-            <SideLink href="/settings" icon={<Settings className="h-4 w-4" />} label="Settings" />
-          </nav>
+            <div className="px-6 py-4 border-t border-white/20">
+              <button className="w-full flex items-center gap-2 text-sm text-white hover:bg-white/15 rounded-xl px-3 py-2 transition-colors">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          </aside>
 
-          <div className="px-6 py-4 border-t border-white/20">
-            <button className="w-full flex items-center gap-2 text-sm text-white hover:bg-white/15 rounded-xl px-3 py-2 transition-colors">
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
-        </aside>
+          {/* Main */}
+          <main className="bg-slate-50">
+            <div className="border-b bg-white">
+              <div className="px-6 py-5 flex flex-col gap-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-start gap-3">
+                    {/* Hamburger (mobile only) */}
+                    <button
+                      className="lg:hidden mt-0.5 rounded-2xl border px-3 py-2 hover:bg-slate-50"
+                      aria-label="Open sidebar"
+                      onClick={() => setSidebarOpen(true)}
+                    >
+                      <Menu className="h-5 w-5 text-slate-700" />
+                    </button>
 
-        {/* Main */}
-        <main className="bg-slate-50">
-          <div className="border-b bg-white">
-            <div className="px-6 py-5 flex flex-col gap-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-start gap-3">
-                  {/* Hamburger (mobile only) */}
-                  <button
-                    className="lg:hidden mt-0.5 rounded-2xl border px-3 py-2 hover:bg-slate-50"
-                    aria-label="Open sidebar"
-                    onClick={() => setSidebarOpen(true)}
-                  >
-                    <Menu className="h-5 w-5 text-slate-700" />
-                  </button>
+                    <div>
+                      <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
+                      {subtitle && <p className="mt-1 text-sm text-slate-600">{subtitle}</p>}
+                    </div>
+                  </div>
 
-                  <div>
-                    <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
-                    {subtitle && <p className="mt-1 text-sm text-slate-600">{subtitle}</p>}
+                  <HeaderRight rightActions={rightActions} />
+                </div>
+
+                {/* Search + controls */}
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <SearchInput />
+
+                  <div className="flex items-center justify-between md:justify-end gap-3">
+                    <RangeToggle />
+
+                    <button className="rounded-2xl border p-2 hover:bg-slate-50" aria-label="Notifications">
+                      <Bell className="h-4 w-4 text-slate-600" />
+                    </button>
+
+                    <button className="inline-flex items-center gap-2 rounded-2xl border px-3 py-2 hover:bg-slate-50">
+                      <div className="h-7 w-7 rounded-full bg-slate-200" />
+                      <div className="text-left leading-tight">
+                        <div className="text-sm font-medium text-slate-800">Admin</div>
+                        <div className="text-[11px] text-slate-500">Librarian</div>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                    </button>
                   </div>
                 </div>
-
-                <HeaderRight rightActions={rightActions} />
-              </div>
-
-              {/* Search + controls */}
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <SearchInput />
-
-                <div className="flex items-center justify-between md:justify-end gap-3">
-                  <RangeToggle />
-
-                  <button className="rounded-2xl border p-2 hover:bg-slate-50" aria-label="Notifications">
-                    <Bell className="h-4 w-4 text-slate-600" />
-                  </button>
-
-                  <button className="inline-flex items-center gap-2 rounded-2xl border px-3 py-2 hover:bg-slate-50">
-                    <div className="h-7 w-7 rounded-full bg-slate-200" />
-                    <div className="text-left leading-tight">
-                      <div className="text-sm font-medium text-slate-800">Admin</div>
-                      <div className="text-[11px] text-slate-500">Librarian</div>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
-                  </button>
-                </div>
               </div>
             </div>
-          </div>
 
-          <FilterPanel />
+            <FilterPanel />
 
-          <div className="px-6 py-6 space-y-6">{children}</div>
+            <div className="px-6 py-6 space-y-6">{children}</div>
 
-          <div className="px-6 pb-8 text-xs text-slate-500">UI-only mock data. Next: connect API.</div>
-        </main>
+            <div className="px-6 pb-8 text-xs text-slate-500">UI-only mock data. Next: connect API.</div>
+          </main>
+        </div>
       </div>
-    </div>
     </ConsoleProvider>
   );
 }
