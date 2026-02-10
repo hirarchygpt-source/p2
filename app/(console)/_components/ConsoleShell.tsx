@@ -247,7 +247,7 @@ export default function ConsoleShell({
                   <button className="inline-flex items-center gap-2 rounded-2xl border px-3 py-2 hover:bg-slate-50">
                     <div className="h-7 w-7 rounded-full bg-slate-200" />
                     <div className="text-left leading-tight">
-                      <div className="text-sm font-medium text-slate-800">Allison</div>
+                      <div className="text-sm font-medium text-slate-800">Admin</div>
                       <div className="text-[11px] text-slate-500">Librarian</div>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400" />
